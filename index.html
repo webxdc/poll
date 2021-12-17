@@ -1,38 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <script src="deltachat.js"></script>
-<script>
-
-// the status is altered by the following events:
-//
-// {"action":"configure", "question":"", "answers":["", "", "", "", ""]}
-// {"action":"vote", "sender":"addr", "vote":0..4}
-//
-// configure is only executed when there are no votes yet,
-// subsequent votes from the same addr overwrite previous votes.
-var status = {
-    "question": "",
-    "answers": [
-        {"answer":"", "votes":[]},
-        {"answer":"", "votes":[]},
-        {"answer":"", "votes":[]},
-        {"answer":"", "votes":[]},
-        {"answer":"", "votes":[]},
-    ]
-};
-
-
-
-var allUpdates = window.deltachat.getAllStatusUpdates();
-document.write(JSON.stringify(allUpdates));
-
-</script>
 </head>
-
 <body>
-    <div id="configure" stype="display:none;">
+    <div id="configurePage" style="display:none;">
         <h2>Configure Your Poll</h2>
         <p>
             Question:<br>
@@ -62,7 +34,7 @@ document.write(JSON.stringify(allUpdates));
             <input type="submit" value="Create Poll">
         </p>
     </div>
-    <div id="vote">
+    <div id="votePage" style="display:none;">
         <h2>Your Vote!</h2>
         <p>
             <input type="radio" id="answer1"> <label for="answer1">Answer 1</label>
@@ -83,32 +55,127 @@ document.write(JSON.stringify(allUpdates));
             <input type="submit" value="Vote">
         </p>
     </div>
-    <div id="results">
+    <div id="resultsPage" style="display:none;">
         <h2>Results</h2>
         <p>
-            Answer 1 (123 votes)<br>
-            <div style="width:30%; background:#888;">&nbsp;</div>
+            <b id="resultsAnswer0">Answer</b> - <span id="resultsVotes0">0 votes</span><br>
+            <div id="resultsBar0" style="width:30%; background:#888;">&nbsp;</div>
         </p>
         <p>
-            Answer 2 (123 votes)<br>
-            <div style="width:50%; background:#888;">&nbsp;</div>
+            <b id="resultsAnswer1">Answer</b> - <span id="resultsVotes1">0 votes</span><br>
+            <div id="resultsBar1" style="width:50%; background:#888;">&nbsp;</div>
         </p>
         <p>
-            Answer 3 (123 votes)<br>
-            <div style="width:20%; background:#888;">&nbsp;</div>
+            <b id="resultsAnswer2">Answer</b> - <span id="resultsVotes2">0 votes</span><br>
+            <div id="resultsBar2" style="width:20%; background:#888;">&nbsp;</div>
         </p>
         <p>
-            Answer 4 (123 votes)<br>
-        <div style="width:0%; background:#888;">&nbsp;</div>
+            <b id="resultsAnswer3">Answer</b> - <span id="resultsVotes3">0 votes</span><br>
+            <div id="resultsBar3" style="width:0%; background:#888;">&nbsp;</div>
         </p>
         <p>
-            Answer 5 (123 votes)<br>
-        <div style="width:0%; background:#888;">&nbsp;</div>
+            <b id="resultsAnswer4">Answer</b> - <span id="resultsVotes4">0 votes</span><br>
+            <div id="resultsBar4" style="width:0%; background:#888;">&nbsp;</div>
         </p>
         <p>
-            Total Votes: 123
+            Total Votes: <span id="resultsTotalVotes">0</span>
         </p>
     </div>
+    <script>
+
+        // the status is altered by the following events:
+        //
+        // {"action":"configure", "question":"", "answers":["", "", "", "", ""]}
+        // {"action":"vote", "sender":"addr", "vote":0..4}
+        //
+        // configure is only executed when there are no votes yet,
+        // subsequent votes from the same addr overwrite previous votes.
+        const MAX_ANSWERS = 5;
+        var globalStatus = {
+            question: "",
+            answers: [
+                {answer:"", votes:[]},
+                {answer:"", votes:[]},
+                {answer:"", votes:[]},
+                {answer:"", votes:[]},
+                {answer:"", votes:[]},
+            ]
+        };
+
+        function isConfigured() {
+            if (globalStatus.question.trim() !== "") {
+                for (let i = 0; i < MAX_ANSWERS; i++) {
+                    if (globalStatus.answers[i].answer.trim() !== "") {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function hasSelfVoted() {
+            var selfAddr = window.deltachat.selfAddr();
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
+                    if (globalStatus.answers[i].votes[j] === selfAddr) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function getTotalVotes() {
+            var totalVotes = 0;
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                totalVotes += globalStatus.answers[i].votes.length;
+            }
+            return totalVotes;
+        }
+
+        function handleEvent(event) {
+            if (event.action === "configure") {
+                if (!isConfigured()) {
+                    globalStatus.question = event.question;
+                    for (let i = 0; i < MAX_ANSWERS; i++) {
+                        globalStatus.answers[i].answer = event.answers[i];
+                    }
+                }
+            } else if (event.action === "vote") {
+                // TODO: remove all previous votes from sender
+                if (event.vote >= 0 && event.vote < MAX_ANSWERS) {
+                    globalStatus.answers[event.vote].votes.push(event.sender);
+                }
+            }
+        }
+
+        var allUpdates = window.deltachat.getAllStatusUpdates();
+        allUpdates.forEach(handleEvent);
+
+        if (!isConfigured()) {
+            document.getElementById("configurePage").style.display = "block";
+        } else if (!hasSelfVoted()) {
+            document.getElementById("votePage").style.display = "block";
+        } else {
+            document.getElementById("resultsPage").style.display = "block";
+            let totalVotes = getTotalVotes();
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                let votes = globalStatus.answers[i].votes.length;
+                let percent = votes*100/totalVotes;
+                document.getElementById("resultsAnswer"+i).innerText = globalStatus.answers[i].answer;
+                document.getElementById("resultsVotes"+i).innerText = votes + (votes===1? " vote (" : " votes (") + percent + "%)";
+                document.getElementById("resultsBar"+i).style.width = percent + "%";
+            }
+            document.getElementById("resultsTotalVotes").innerText = totalVotes;
+        }
+
+
+        document.writeln(JSON.stringify(globalStatus));
+
+        // tools
+        // document.getElementById("demo").innerHTML = fruits;
+
+    </script>
 </body>
 
 </html>

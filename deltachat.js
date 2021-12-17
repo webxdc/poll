@@ -12,7 +12,7 @@ window.deltachat = (() => {
         selfAddr: () => "foo@bar.de",
         setStatusUpdateListener: (cb) => (update_listener = cb),
         getAllStatusUpdates: () => {
-            return JSON.parse('[{"action":"configure", "question":"your favorite color", "answers":["red","green","blue","yellow","purple"]}]');
+            return JSON.parse('[{"action":"configure", "question":"your favorite colorxx", "answers":["red","green","blue","yellow","purple1"]},{"action":"vote", "sender":"foo2@bar.de", "vote":0},{"action":"vote", "sender":"foo@bar.de", "vote":0}]');
         },
         sendStatusUpdate: (description, payload) => {
             InternalJSApi.sendStatusUpdate(description, payload);
