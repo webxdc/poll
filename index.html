@@ -8,27 +8,27 @@
         <h2>Configure Your Poll</h2>
         <p>
             Question:<br>
-            <input type="text" name="question">
+            <input type="text" name="configureQuestion">
         </p>
         <p>
             Answer #1:<br>
-            <input type="text" name="answer1">
+            <input type="text" name="configureAnswer0">
         </p>
         <p>
             Answer #2:<br>
-            <input type="text" name="answer2">
+            <input type="text" name="configureAnswer1">
         </p>
         <p>
             Answer #3:<br>
-            <input type="text" name="answer3">
+            <input type="text" name="configureAnswer2">
         </p>
         <p>
             Answer #4:<br>
-            <input type="text" name="answer4">
+            <input type="text" name="configureAnswer3">
         </p>
         <p>
             Answer #5:<br>
-            <input type="text" name="answer5">
+            <input type="text" name="configureAnswer4">
         </p>
         <p>
             <input type="submit" value="Create Poll">
@@ -37,19 +37,19 @@
     <div id="votePage" style="display:none;">
         <h2>Your Vote!</h2>
         <p>
-            <input type="radio" id="answer1"> <label for="answer1">Answer 1</label>
+            <input type="radio" name="vote" id="voteRadio0"> <label id="voteLabel0" for="voteRadio0">Answer</label>
         </p>
         <p>
-            <input type="radio" id="answer2"> <label for="answer2">Answer 2</label>
+            <input type="radio" name="vote" id="voteRadio1"> <label id="voteLabel1" for="voteRadio1">Answer</label>
         </p>
         <p>
-            <input type="radio" id="answer3"> <label for="answer3">Answer 3</label>
+            <input type="radio" name="vote" id="voteRadio2"> <label id="voteLabel2" for="voteRadio2">Answer</label>
         </p>
         <p>
-            <input type="radio" id="answer4"> <label for="answer4">Answer 4</label>
+            <input type="radio" name="vote" id="voteRadio3"> <label id="voteLabel3" for="voteRadio3">Answer</label>
         </p>
         <p>
-            <input type="radio" id="answer5"> <label for="answer5">Answer 5</label>
+            <input type="radio" name="vote" id="voteRadio4"> <label id="voteLabel4" for="voteRadio4">Answer</label>
         </p>
         <p>
             <input type="submit" value="Vote">
@@ -156,6 +156,9 @@
             document.getElementById("configurePage").style.display = "block";
         } else if (!hasSelfVoted()) {
             document.getElementById("votePage").style.display = "block";
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                document.getElementById("voteLabel"+i).innerText = globalStatus.answers[i].answer;
+            }
         } else {
             document.getElementById("resultsPage").style.display = "block";
             let totalVotes = getTotalVotes();
@@ -169,11 +172,7 @@
             document.getElementById("resultsTotalVotes").innerText = totalVotes;
         }
 
-
         document.writeln(JSON.stringify(globalStatus));
-
-        // tools
-        // document.getElementById("demo").innerHTML = fruits;
 
     </script>
 </body>
