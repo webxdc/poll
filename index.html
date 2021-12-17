@@ -2,14 +2,37 @@
 <html>
 
 <head>
-<script src="deltachat.js">
+<script src="deltachat.js"></script>
 <script>
+
+// the status is altered by the following events:
+//
+// {"action":"configure", "question":"", "answers":["", "", "", "", ""]}
+// {"action":"vote", "sender":"addr", "vote":0..4}
+//
+// configure is only executed when there are no votes yet,
+// subsequent votes from the same addr overwrite previous votes.
+var status = {
+    "question": "",
+    "answers": [
+        {"answer":"", "votes":[]},
+        {"answer":"", "votes":[]},
+        {"answer":"", "votes":[]},
+        {"answer":"", "votes":[]},
+        {"answer":"", "votes":[]},
+    ]
+};
+
+
+
+var allUpdates = window.deltachat.getAllStatusUpdates();
+document.write(JSON.stringify(allUpdates));
 
 </script>
 </head>
 
 <body>
-    <div id="configure">
+    <div id="configure" stype="display:none;">
         <h2>Configure Your Poll</h2>
         <p>
             Question:<br>
