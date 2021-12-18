@@ -273,7 +273,7 @@
                 let totalVotes = getTotalVotes();
                 for (let i = 0; i < MAX_ANSWERS; i++) {
                     let votes = globalStatus.answers[i].votes.length;
-                    let percent = totalVotes === 0? 0 : votes*100/totalVotes;
+                    let percent = totalVotes === 0? 0 : Math.round(votes*100/totalVotes);
                     let barWidth = percent === 0? "1px" : (percent + "%");
                     document.getElementById("resultsDiv"+i).style.display = globalStatus.answers[i].answer === ""? "none" : "block";
                     document.getElementById("resultsAnswer"+i).innerText = globalStatus.answers[i].answer;
