@@ -1,3 +1,5 @@
+// debug friend: document.writeln(JSON.stringify(value));
+
 window.deltachat = (() => {
     var update_listener = () => {};
 
@@ -12,7 +14,10 @@ window.deltachat = (() => {
         selfAddr: () => "foo@bar.dex",
         setStatusUpdateListener: (cb) => (update_listener = cb),
         getAllStatusUpdates: () => {
-            return JSON.parse('[{"action":"configure", "question":"your favorite colorxx", "answers":["red","green","blue","yellow","purple1"]},{"action":"vote", "sender":"foo2@bar.de", "vote":0},{"action":"vote", "sender":"foo@bar.de", "vote":0}]');
+            return JSON.parse(
+                '[]'
+                //'[{"action":"configure", "question":"your favorite colorxx", "answers":["red","green","blue","yellow","purple1"]},{"action":"vote", "sender":"foo2@bar.de", "vote":0},{"action":"vote", "sender":"foo@bar.de", "vote":0}]'
+            );
         },
         sendStatusUpdate: (description, payload) => {
             InternalJSApi.sendStatusUpdate(description, payload);

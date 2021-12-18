@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<script src="deltachat.js"></script>
+    <meta charset="utf-8"/>
+    <script src="deltachat.js"></script>
 </head>
+
 <body>
     <div id="configurePage" style="display:none;">
         <h2>Configure Your Poll</h2>
         <p>
             Question:<br>
-            <input type="text" name="configureQuestion">
+            <input type="text" id="configureQuestion">
         </p>
         <p>
             Answer #1:<br>
-            <input type="text" name="configureAnswer0">
+            <input type="text" id="configureAnswer0">
         </p>
         <p>
             Answer #2:<br>
-            <input type="text" name="configureAnswer1">
+            <input type="text" id="configureAnswer1">
         </p>
         <p>
             Answer #3:<br>
-            <input type="text" name="configureAnswer2">
+            <input type="text" id="configureAnswer2">
         </p>
         <p>
             Answer #4:<br>
-            <input type="text" name="configureAnswer3">
+            <input type="text" id="configureAnswer3">
         </p>
         <p>
             Answer #5:<br>
-            <input type="text" name="configureAnswer4">
+            <input type="text" id="configureAnswer4">
         </p>
         <p>
-            <input type="submit" value="Create Poll">
+            <span id="configureHint">Leave unneeded answers fields empty.</span>
+        </p>
+        <p>
+            <a href="" onclick="configure(); return false;">Create Poll</a>
         </p>
     </div>
     <div id="votePage" style="display:none;">
-        <h2>Your Vote!</h2>
+        <h2 id="voteQuestion">Question</h2>
         <p>
             <input type="radio" name="vote" id="voteRadio0"> <label id="voteLabel0" for="voteRadio0">Answer</label>
         </p>
@@ -52,7 +58,7 @@
             <input type="radio" name="vote" id="voteRadio4"> <label id="voteLabel4" for="voteRadio4">Answer</label>
         </p>
         <p>
-            <input type="submit" value="Vote">
+            <a href="" onclick="return false;">Vote</a>
         </p>
     </div>
     <div id="resultsPage" style="display:none;">
@@ -102,15 +108,37 @@
             ]
         };
 
-        function isConfigured() {
-            if (globalStatus.question.trim() !== "") {
-                for (let i = 0; i < MAX_ANSWERS; i++) {
-                    if (globalStatus.answers[i].answer.trim() !== "") {
-                        return true;
-                    }
+        function configure() {
+            // validate input
+            if (document.getElementById("configureQuestion").value.trim() === "") {
+                document.getElementById("configureHint").innerText = "⚠️ Please enter a question.";
+                return;
+            }
+            var answers = 0;
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                if (document.getElementById("configureAnswer"+i).value.trim() !== "") {
+                    answers++;
                 }
             }
-            return false;
+            if (answers < 2) {
+                document.getElementById("configureHint").innerText = "⚠️ Please enter at least two answers.";
+                return;
+            }
+
+            // change status
+            globalStatus.question = document.getElementById("configureQuestion").value.trim();
+            var j = 0;
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                if (document.getElementById("configureAnswer"+i).value.trim() !== "") {
+                    globalStatus.answers[j++].answer = document.getElementById("configureAnswer"+i).value.trim();
+                }
+            }
+
+            refresh();
+        }
+
+        function isConfigured() {
+            return globalStatus.question.trim() !== "";
         }
 
         function hasSelfVoted() {
@@ -133,6 +161,33 @@
             return totalVotes;
         }
 
+        function refresh() {
+            if (!isConfigured()) {
+                document.getElementById("configurePage").style.display = "block";
+            } else if (!hasSelfVoted()) {
+                document.getElementById("configurePage").style.display = "none";
+                document.getElementById("votePage").style.display = "block";
+                document.getElementById("resultsPage").style.display = "none";
+                document.getElementById("voteQuestion").innerText = globalStatus.question;
+                for (let i = 0; i < MAX_ANSWERS; i++) {
+                    document.getElementById("voteLabel"+i).innerText = globalStatus.answers[i].answer;
+                }
+            } else {
+                document.getElementById("configurePage").style.display = "none";
+                document.getElementById("votePage").style.display = "none";
+                document.getElementById("resultsPage").style.display = "block";
+                let totalVotes = getTotalVotes();
+                for (let i = 0; i < MAX_ANSWERS; i++) {
+                    let votes = globalStatus.answers[i].votes.length;
+                    let percent = votes*100/totalVotes;
+                    document.getElementById("resultsAnswer"+i).innerText = globalStatus.answers[i].answer;
+                    document.getElementById("resultsVotes"+i).innerText = votes + (votes===1? " vote (" : " votes (") + percent + "%)";
+                    document.getElementById("resultsBar"+i).style.width = percent + "%";
+                }
+                document.getElementById("resultsTotalVotes").innerText = totalVotes;
+            }
+        }
+
         function handleEvent(event) {
             if (event.action === "configure") {
                 if (!isConfigured()) {
@@ -152,27 +207,7 @@
         var allUpdates = window.deltachat.getAllStatusUpdates();
         allUpdates.forEach(handleEvent);
 
-        if (!isConfigured()) {
-            document.getElementById("configurePage").style.display = "block";
-        } else if (!hasSelfVoted()) {
-            document.getElementById("votePage").style.display = "block";
-            for (let i = 0; i < MAX_ANSWERS; i++) {
-                document.getElementById("voteLabel"+i).innerText = globalStatus.answers[i].answer;
-            }
-        } else {
-            document.getElementById("resultsPage").style.display = "block";
-            let totalVotes = getTotalVotes();
-            for (let i = 0; i < MAX_ANSWERS; i++) {
-                let votes = globalStatus.answers[i].votes.length;
-                let percent = votes*100/totalVotes;
-                document.getElementById("resultsAnswer"+i).innerText = globalStatus.answers[i].answer;
-                document.getElementById("resultsVotes"+i).innerText = votes + (votes===1? " vote (" : " votes (") + percent + "%)";
-                document.getElementById("resultsBar"+i).style.width = percent + "%";
-            }
-            document.getElementById("resultsTotalVotes").innerText = totalVotes;
-        }
-
-        document.writeln(JSON.stringify(globalStatus));
+        refresh();
 
     </script>
 </body>
