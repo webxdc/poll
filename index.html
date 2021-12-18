@@ -211,7 +211,7 @@
             }
 
             // change status
-            // TODO: remove previous votes from self
+            removeVote(window.deltachat.selfAddr());
             globalStatus.answers[vote].votes.push(window.deltachat.selfAddr());
 
             // send event
@@ -233,6 +233,17 @@
                 }
             }
             return false;
+        }
+
+        function removeVote(addr) {
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
+                    if (globalStatus.answers[i].votes[j] === addr) {
+                        globalStatus.answers[i].votes.splice(j, 1);
+                        j--;
+                    }
+                }
+            }
         }
 
         function getTotalVotes() {
@@ -283,7 +294,7 @@
                     }
                 }
             } else if (event.action === "vote") {
-                // TODO: remove all previous votes from sender
+                removeVote(event.sender)
                 if (event.vote >= 0 && event.vote < MAX_ANSWERS) {
                     globalStatus.answers[event.vote].votes.push(event.sender);
                 }
