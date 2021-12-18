@@ -303,7 +303,12 @@
 
         var allUpdates = window.deltachat.getAllStatusUpdates();
         allUpdates.forEach(handleEvent);
-        window.deltachat.setStatusUpdateListener(handleEvent)
+        window.deltachat.setStatusUpdateListener((event) => {
+            handleEvent(event);
+            if (document.getElementById("resultsPage").style.display === "block") {
+                refresh("resultsPage");
+            }
+        })
 
         if (!isConfigured()) {
             refresh("configurePage");
