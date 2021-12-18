@@ -20,7 +20,7 @@ window.deltachat = (() => {
             );
         },
         sendStatusUpdate: (description, payload) => {
-            InternalJSApi.sendStatusUpdate(description, payload);
+            alert(description+"\n\n"+JSON.stringify(payload));
         },
     };
 })();

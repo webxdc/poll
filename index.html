@@ -26,8 +26,11 @@
         input[type=text] {
             width: 90%;
         }
-        .button {
+        a {
+            color: #3792fc;
             text-decoration: none;
+        }
+        a.button {
             color: #fff;
             background: #3792fc;
             padding: 1em;
@@ -93,9 +96,11 @@
         <p id="voteDiv4">
             <input type="radio" name="vote" id="voteRadio4"> <label id="voteLabel4" for="voteRadio4">Answer</label>
         </p>
-        <p id="voteDiv5">
+        <p id="voteHint" style="display:none;">
+        </p>
+        <p>
             <br>
-            <a class="button" href="" onclick="return false;">Vote</a>
+            <a class="button" href="" onclick="vote(); return false;">Vote</a>
             <a href="" onclick="refresh('resultsPage'); return false;">View Results</a>
         </p>
     </div>
@@ -155,13 +160,13 @@
                 document.getElementById("configureHint").innerText = "⚠️ Please enter a question.";
                 return;
             }
-            var answers = 0;
+            var answersCnt = 0;
             for (let i = 0; i < MAX_ANSWERS; i++) {
                 if (document.getElementById("configureAnswer"+i).value.trim() !== "") {
-                    answers++;
+                    answersCnt++;
                 }
             }
-            if (answers < 2) {
+            if (answersCnt < 2) {
                 document.getElementById("configureHint").innerText = "⚠️ Please enter at least two answers.";
                 return;
             }
@@ -169,17 +174,53 @@
             // change status
             globalStatus.question = document.getElementById("configureQuestion").value.trim();
             var j = 0;
+            var answers = [];
             for (let i = 0; i < MAX_ANSWERS; i++) {
                 if (document.getElementById("configureAnswer"+i).value.trim() !== "") {
-                    globalStatus.answers[j++].answer = document.getElementById("configureAnswer"+i).value.trim();
+                    answers[j] = document.getElementById("configureAnswer"+i).value.trim();
+                    globalStatus.answers[j].answer = answers[j];
+                    j++;
                 }
             }
+
+            // send event
+            window.deltachat.sendStatusUpdate(
+                "Poll \"" +  globalStatus.question + "\" created.",
+                {action:"configure", question:globalStatus.question, answers:answers}
+            );
 
             refresh("votePage");
         }
 
         function isConfigured() {
             return globalStatus.question.trim() !== "";
+        }
+
+        function vote() {
+            // validate input
+            var vote = -1;
+            for (let i = 0; i < MAX_ANSWERS; i++) {
+                if (document.getElementById("voteRadio"+i).checked) {
+                    vote = i;
+                }
+            }
+            if (vote === -1) {
+                document.getElementById("voteHint").innerText = "⚠️ Please choose an option.";
+                document.getElementById("voteHint").style.display = "block";
+                return;
+            }
+
+            // change status
+            // TODO: remove previous votes from self
+            globalStatus.answers[vote].votes.push(window.deltachat.selfAddr());
+
+            // send event
+            window.deltachat.sendStatusUpdate(
+                "One vote for \"" + globalStatus.answers[vote].answer + "\".",
+                {action:"vote", sender:window.deltachat.selfAddr(), "vote":vote}
+            );
+
+            refresh("resultsPage");
         }
 
         function hasSelfVoted() {
@@ -209,6 +250,7 @@
                 document.getElementById("configurePage").style.display = "none";
                 document.getElementById("resultsPage").style.display = "none";
                 document.getElementById("voteQuestion").innerText = globalStatus.question;
+                document.getElementById("voteHint").style.display = "none";
                 for (let i = 0; i < MAX_ANSWERS; i++) {
                     document.getElementById("voteDiv"+i).style.display = globalStatus.answers[i].answer === ""? "none" : "block";
                     document.getElementById("voteLabel"+i).innerText = globalStatus.answers[i].answer;
@@ -237,7 +279,7 @@
                 if (!isConfigured()) {
                     globalStatus.question = event.question;
                     for (let i = 0; i < MAX_ANSWERS; i++) {
-                        globalStatus.answers[i].answer = event.answers[i];
+                        globalStatus.answers[i].answer = i<event.answers.length? event.answers[i] : "";
                     }
                 }
             } else if (event.action === "vote") {
