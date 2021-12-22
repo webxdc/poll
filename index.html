@@ -135,7 +135,7 @@
     </div>
     <script>
 
-        // the status is altered by the following events:
+        // the status is altered by the following updates:
         //
         // {"action":"configure", "question":"", "answers":["", "", "", "", ""]}
         // {"action":"vote", "sender":"addr", "vote":0..4}
@@ -183,7 +183,7 @@
                 }
             }
 
-            // send event
+            // send update
             window.deltachat.sendUpdate(
                 "Poll \"" +  globalStatus.question + "\" created.",
                 {action:"configure", question:globalStatus.question, answers:answers}
@@ -214,7 +214,7 @@
             removeVote(window.deltachat.selfAddr());
             globalStatus.answers[vote].votes.push(window.deltachat.selfAddr());
 
-            // send event
+            // send update
             window.deltachat.sendUpdate(
                 "One vote for \"" + globalStatus.answers[vote].answer + "\".",
                 {action:"vote", sender:window.deltachat.selfAddr(), "vote":vote}
@@ -285,27 +285,27 @@
             document.getElementById(page).style.display = "block";
         }
 
-        function handleEvent(event) {
-            if (event.action === "configure") {
+        function handleUpdate(update) {
+            if (update.payload.action === "configure") {
                 if (!isConfigured()) {
-                    globalStatus.question = event.question;
+                    globalStatus.question = update.payload.question;
                     for (let i = 0; i < MAX_ANSWERS; i++) {
-                        globalStatus.answers[i].answer = i<event.answers.length? event.answers[i] : "";
+                        globalStatus.answers[i].answer = i<update.payload.answers.length? update.payload.answers[i] : "";
                     }
                 }
-            } else if (event.action === "vote") {
-                removeVote(event.sender)
-                if (event.vote >= 0 && event.vote < MAX_ANSWERS) {
-                    globalStatus.answers[event.vote].votes.push(event.sender);
+            } else if (update.payload.action === "vote") {
+                removeVote(update.payload.sender)
+                if (update.payload.vote >= 0 && update.payload.vote < MAX_ANSWERS) {
+                    globalStatus.answers[update.payload.vote].votes.push(update.payload.sender);
                 }
             }
         }
 
         // main
         var allUpdates = window.deltachat.getAllUpdates();
-        allUpdates.forEach(handleEvent);
-        window.deltachat.setUpdateListener((event) => {
-            handleEvent(event);
+        allUpdates.forEach(handleUpdate);
+        window.deltachat.setUpdateListener((update) => {
+            handleUpdate(update);
             if (document.getElementById("resultsPage").style.display === "block") {
                 refresh("resultsPage");
             }
