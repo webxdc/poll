@@ -186,7 +186,7 @@
             // send update
             window.deltachat.sendUpdate(
                 "Poll \"" +  globalStatus.question + "\" created.",
-                {action:"configure", question:globalStatus.question, answers:answers}
+                {action:"configure", sender:window.deltachat.selfAddr(), question:globalStatus.question, answers:answers}
             );
 
             refresh("votePage");
@@ -305,9 +305,11 @@
         var allUpdates = window.deltachat.getAllUpdates();
         allUpdates.forEach(handleUpdate);
         window.deltachat.setUpdateListener((update) => {
-            handleUpdate(update);
-            if (document.getElementById("resultsPage").style.display === "block") {
-                refresh("resultsPage");
+            if (update.payload.sender !== window.deltachat.selfAddr()) {
+                handleUpdate(update);
+                if (document.getElementById("resultsPage").style.display === "block") {
+                    refresh("resultsPage");
+                }
             }
         })
 
