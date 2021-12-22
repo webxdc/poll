@@ -184,7 +184,7 @@
             }
 
             // send event
-            window.deltachat.sendStatusUpdate(
+            window.deltachat.sendUpdate(
                 "Poll \"" +  globalStatus.question + "\" created.",
                 {action:"configure", question:globalStatus.question, answers:answers}
             );
@@ -215,7 +215,7 @@
             globalStatus.answers[vote].votes.push(window.deltachat.selfAddr());
 
             // send event
-            window.deltachat.sendStatusUpdate(
+            window.deltachat.sendUpdate(
                 "One vote for \"" + globalStatus.answers[vote].answer + "\".",
                 {action:"vote", sender:window.deltachat.selfAddr(), "vote":vote}
             );
@@ -302,9 +302,9 @@
         }
 
         // main
-        var allUpdates = window.deltachat.getAllStatusUpdates();
+        var allUpdates = window.deltachat.getAllUpdates();
         allUpdates.forEach(handleEvent);
-        window.deltachat.setStatusUpdateListener((event) => {
+        window.deltachat.setUpdateListener((event) => {
             handleEvent(event);
             if (document.getElementById("resultsPage").style.display === "block") {
                 refresh("resultsPage");
