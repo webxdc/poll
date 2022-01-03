@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8"/>
-    <script src="deltachat.js"></script>
+    <script src="webxdc.js"></script>
     <style>
         html {
             height: 100%;
@@ -184,9 +184,9 @@
             }
 
             // send update
-            window.deltachat.sendUpdate(
+            window.webxdc.sendUpdate(
                 "Poll \"" +  globalStatus.question + "\" created.",
-                {action:"configure", sender:window.deltachat.selfAddr(), question:globalStatus.question, answers:answers}
+                {action:"configure", sender:window.webxdc.selfAddr(), question:globalStatus.question, answers:answers}
             );
 
             refresh("votePage");
@@ -211,20 +211,20 @@
             }
 
             // change status
-            removeVote(window.deltachat.selfAddr());
-            globalStatus.answers[vote].votes.push(window.deltachat.selfAddr());
+            removeVote(window.webxdc.selfAddr());
+            globalStatus.answers[vote].votes.push(window.webxdc.selfAddr());
 
             // send update
-            window.deltachat.sendUpdate(
+            window.webxdc.sendUpdate(
                 "One vote for \"" + globalStatus.answers[vote].answer + "\".",
-                {action:"vote", sender:window.deltachat.selfAddr(), "vote":vote}
+                {action:"vote", sender:window.webxdc.selfAddr(), "vote":vote}
             );
 
             refresh("resultsPage");
         }
 
         function hasSelfVoted() {
-            var selfAddr = window.deltachat.selfAddr();
+            var selfAddr = window.webxdc.selfAddr();
             for (let i = 0; i < MAX_ANSWERS; i++) {
                 for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
                     if (globalStatus.answers[i].votes[j] === selfAddr) {
@@ -302,10 +302,10 @@
         }
 
         // main
-        var allUpdates = window.deltachat.getAllUpdates();
+        var allUpdates = window.webxdc.getAllUpdates();
         allUpdates.forEach(handleUpdate);
-        window.deltachat.setUpdateListener((update) => {
-            if (update.payload.sender !== window.deltachat.selfAddr()) {
+        window.webxdc.setUpdateListener((update) => {
+            if (update.payload.sender !== window.webxdc.selfAddr()) {
                 handleUpdate(update);
                 if (document.getElementById("resultsPage").style.display === "block") {
                     refresh("resultsPage");
