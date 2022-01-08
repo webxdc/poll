@@ -185,8 +185,8 @@
 
             // send update
             window.webxdc.sendUpdate(
-                "Poll \"" +  globalStatus.question + "\" created.",
-                {action:"configure", sender:window.webxdc.selfAddr(), question:globalStatus.question, answers:answers}
+                {action:"configure", sender:window.webxdc.selfAddr(), question:globalStatus.question, answers:answers},
+                "Poll \"" +  globalStatus.question + "\" created."
             );
 
             refresh("votePage");
@@ -216,8 +216,8 @@
 
             // send update
             window.webxdc.sendUpdate(
-                "One vote for \"" + globalStatus.answers[vote].answer + "\".",
-                {action:"vote", sender:window.webxdc.selfAddr(), "vote":vote}
+                {action:"vote", sender:window.webxdc.selfAddr(), "vote":vote},
+                "One vote for \"" + globalStatus.answers[vote].answer + "\"."
             );
 
             refresh("resultsPage");
