@@ -7,8 +7,9 @@ window.webxdc = (() => {
             window.location.reload();
         } else if (event.key === updatesKey) {
             var updates = JSON.parse(event.newValue);
+            var update = updates[updates.length-1];
             console.log("[Webxdc] " + JSON.stringify(update));
-            updateListener(updates[updates.length-1]);
+            updateListener(update);
         }
     });
 
@@ -61,7 +62,7 @@ window.clearXdcStorage = () => {
 }
 
 window.alterXdcApp = () => {
-    var styleControlPanel = 'position: fixed; bottom:1em; left:1em; background-color: #000; opacity:0.8; padding:.5em; font-family: sans-serif; color:#fff;';
+    var styleControlPanel = 'position: fixed; bottom:1em; left:1em; background-color: #000; opacity:0.8; padding:.5em; font-family: sans-serif; color:#fff; z-index: 9999';
     var styleMenuLink = 'color:#fff; text-decoration: none; vertical-align: middle';
     var styleAppIcon = 'height: 1.5em; width: 1.5em; margin-right: 0.5em; border-radius:10%; vertical-align: middle';
     var title = document.getElementsByTagName('title')[0];
