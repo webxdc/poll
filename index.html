@@ -307,7 +307,10 @@
         window.webxdc.setUpdateListener((update) => {
             if (update.payload.sender !== window.webxdc.selfAddr()) {
                 handleUpdate(update);
-                if (document.getElementById("resultsPage").style.display === "block") {
+                if (update.payload.action === "configure" && document.getElementById("configurePage").style.display === "block") {
+                    refresh("votePage");
+                }
+                else if (document.getElementById("resultsPage").style.display === "block") {
                     refresh("resultsPage");
                 }
             }
