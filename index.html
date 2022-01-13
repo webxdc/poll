@@ -137,8 +137,8 @@
 
         // the status is altered by the following updates:
         //
-        // {"action":"configure", "question":"", "answers":["", "", "", "", ""]}
-        // {"action":"vote", "sender":"addr", "vote":0..4}
+        // {action:"configure", question:"", answers:["", "", "", "", ""]}
+        // {action:"vote", sender:"addr", vote:0..4}
         //
         // configure is only executed when there are no votes yet,
         // subsequent votes from the same addr overwrite previous votes.
@@ -216,7 +216,7 @@
 
             // send update
             window.webxdc.sendUpdate(
-                {action:"vote", sender:window.webxdc.selfAddr(), "vote":vote},
+                {action:"vote", sender:window.webxdc.selfAddr(), vote:vote},
                 "One vote for \"" + globalStatus.answers[vote].answer + "\"."
             );
 
