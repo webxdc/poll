@@ -185,7 +185,7 @@
 
             // send update
             window.webxdc.sendUpdate(
-                {action:"configure", sender:window.webxdc.selfAddr(), question:globalStatus.question, answers:answers},
+                {payload:{action:"configure", sender:window.webxdc.selfAddr, question:globalStatus.question, answers:answers}},
                 "Poll \"" +  globalStatus.question + "\" created."
             );
 
@@ -211,12 +211,12 @@
             }
 
             // change status
-            removeVote(window.webxdc.selfAddr());
-            globalStatus.answers[vote].votes.push(window.webxdc.selfAddr());
+            removeVote(window.webxdc.selfAddr);
+            globalStatus.answers[vote].votes.push(window.webxdc.selfAddr);
 
             // send update
             window.webxdc.sendUpdate(
-                {action:"vote", sender:window.webxdc.selfAddr(), vote:vote},
+                {payload:{action:"vote", sender:window.webxdc.selfAddr, vote:vote}},
                 "One vote for \"" + globalStatus.answers[vote].answer + "\"."
             );
 
@@ -224,7 +224,7 @@
         }
 
         function hasSelfVoted() {
-            var selfAddr = window.webxdc.selfAddr();
+            var selfAddr = window.webxdc.selfAddr;
             for (let i = 0; i < MAX_ANSWERS; i++) {
                 for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
                     if (globalStatus.answers[i].votes[j] === selfAddr) {
@@ -302,10 +302,9 @@
         }
 
         // main
-        var allUpdates = window.webxdc.getAllUpdates();
-        allUpdates.forEach(handleUpdate);
+        window.webxdc.getAllUpdates().then(updates => updates.forEach(handleUpdate));
         window.webxdc.setUpdateListener((update) => {
-            if (update.payload.sender !== window.webxdc.selfAddr()) {
+            if (update.payload.sender !== window.webxdc.selfAddr) {
                 handleUpdate(update);
                 if (update.payload.action === "configure" && document.getElementById("configurePage").style.display === "block") {
                     refresh("votePage");
