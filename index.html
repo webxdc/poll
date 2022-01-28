@@ -302,7 +302,6 @@
         }
 
         // main
-        window.webxdc.getAllUpdates().then(updates => updates.forEach(handleUpdate));
         window.webxdc.setUpdateListener((update) => {
             if (update.payload.sender !== window.webxdc.selfAddr) {
                 handleUpdate(update);
@@ -315,13 +314,16 @@
             }
         })
 
-        if (!isConfigured()) {
-            refresh("configurePage");
-        } else if (!hasSelfVoted()) {
-            refresh("votePage");
-        } else {
-            refresh("resultsPage");
-        }
+        window.webxdc.getAllUpdates().then(updates => {
+            updates.forEach(handleUpdate);
+            if (!isConfigured()) {
+                refresh("configurePage");
+            } else if (!hasSelfVoted()) {
+                refresh("votePage");
+            } else {
+                refresh("resultsPage");
+            }
+        });
 
     </script>
 </body>
