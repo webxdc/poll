@@ -45,7 +45,7 @@
 </head>
 
 <body>
-    <div id="configurePage" class="page" style="display:none;">
+    <div id="configurePage" class="page" style="display:block;">
         <h2>Configure Your Poll</h2>
         <p>
             <b>Question:</b><br>
@@ -192,8 +192,6 @@
                 },
                 "Poll \"" +  globalStatus.question + "\" created."
             );
-
-            refresh("votePage");
         }
 
         function isConfigured() {
@@ -226,8 +224,6 @@
                 },
                 "One vote for \"" + globalStatus.answers[vote].answer + "\"."
             );
-
-            refresh("resultsPage");
         }
 
         function hasSelfVoted() {
@@ -292,7 +288,8 @@
             document.getElementById(page).style.display = "block";
         }
 
-        function handleUpdate(update) {
+        // main
+        window.webxdc.setUpdateListener((update) => {
             if (update.payload.action === "configure") {
                 if (!isConfigured()) {
                     globalStatus.question = update.payload.question;
@@ -306,31 +303,17 @@
                     globalStatus.answers[update.payload.vote].votes.push(update.payload.sender);
                 }
             }
-        }
 
-        // main
-        window.webxdc.setUpdateListener((update) => {
-            if (update.payload.sender !== window.webxdc.selfAddr) {
-                handleUpdate(update);
-                if (update.payload.action === "configure" && document.getElementById("configurePage").style.display === "block") {
+            if (update.serial === update.max_serial) {
+                if (!isConfigured()) {
+                    refresh("configurePage");
+                } else if (!hasSelfVoted()) {
                     refresh("votePage");
-                }
-                else if (document.getElementById("resultsPage").style.display === "block") {
+                } else {
                     refresh("resultsPage");
                 }
             }
         })
-
-        window.webxdc.getAllUpdates().then(updates => {
-            updates.forEach(handleUpdate);
-            if (!isConfigured()) {
-                refresh("configurePage");
-            } else if (!hasSelfVoted()) {
-                refresh("votePage");
-            } else {
-                refresh("resultsPage");
-            }
-        });
 
     </script>
 </body>
