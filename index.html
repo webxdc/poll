@@ -283,6 +283,15 @@
             document.getElementById(page).style.display = "block";
         }
 
+        function updateScreen() {
+            if (!isConfigured()) {
+                refresh("configurePage");
+            } else if (!hasSelfVoted()) {
+                refresh("votePage");
+            } else {
+                refresh("resultsPage");
+            }
+        }
         // main
         window.webxdc.setUpdateListener((update) => {
             if (update.payload.action === "configure") {
@@ -298,15 +307,11 @@
                     globalStatus.answers[update.payload.vote].votes.push(update.payload.sender);
                 }
             }
-        }).then(()=>{
-            if (!isConfigured()) {
-                refresh("configurePage");
-            } else if (!hasSelfVoted()) {
-                refresh("votePage");
-            } else {
-                refresh("resultsPage");
+
+            if (update.serial === update.max_serial) {
+                updateScreen()
             }
-        })
+        }).then(updateScreen)
 
     </script>
 </body>
