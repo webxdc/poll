@@ -361,7 +361,7 @@
 					removeVote(update.payload.sender);
 					if (
 						update.payload.vote.length >= 1 &&
-						update.payload.vote <= MAX_ANSWERS
+						update.payload.vote.length <= MAX_ANSWERS
 					) {
 						for (let i = 0; i < update.payload.vote.length; i++) {
 							globalStatus.answers[update.payload.vote[i]].votes.push(
