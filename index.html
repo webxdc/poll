@@ -54,36 +54,32 @@
 	<body>
 		<div id="configurePage" class="page" style="display: block">
 			<h2>Configure Your Poll</h2>
-			<p>
-				<b>Question:</b><br />
-				<input type="text" id="configureQuestion" /><br />
-				&nbsp;
-			</p>
-			<p>
-				Answer #1:<br />
-				<input type="text" id="configureAnswer0" />
-			</p>
-			<p>
-				Answer #2:<br />
-				<input type="text" id="configureAnswer1" />
-			</p>
-			<p>
-				Answer #3:<br />
-				<input type="text" id="configureAnswer2" />
-			</p>
-			<p>
-				Answer #4:<br />
-				<input type="text" id="configureAnswer3" />
-			</p>
-			<p>
-				Answer #5:<br />
-				<input type="text" id="configureAnswer4" />
-			</p>
+			<div id="answers">
+				<p>
+					<b>Question:</b><br />
+					<input type="text" id="configureQuestion" /><br />
+					&nbsp;
+				</p>
+				<p>
+					Answer #1:<br />
+					<input type="text" id="configureAnswer0" class="answer" />
+				</p>
+				<p>
+					Answer #2:<br />
+					<input type="text" id="configureAnswer1" class="answer" />
+				</p>
+			</div>
 			<p>
 				<span id="configureHint">Leave unneeded answers fields empty.</span
 				><br />
 				&nbsp;
 			</p>
+			<p>
+				<a class="button" href="" onclick="addAnswer(); return false;"
+					>Add an answer</a
+				>
+			</p>
+
 			<p>
 				<a class="button" href="" onclick="configure(); return false;"
 					>Create Poll</a
@@ -92,26 +88,16 @@
 		</div>
 		<div id="votePage" class="page" style="display: none">
 			<h2 id="voteQuestion">Question</h2>
-			<p id="voteDiv0">
-				<input type="checkbox" name="vote" id="voteRadio0" />
-				<label id="voteLabel0" for="voteRadio0">Answer</label>
-			</p>
-			<p id="voteDiv1">
-				<input type="checkbox" name="vote" id="voteRadio1" />
-				<label id="voteLabel1" for="voteRadio1">Answer</label>
-			</p>
-			<p id="voteDiv2">
-				<input type="checkbox" name="vote" id="voteRadio2" />
-				<label id="voteLabel2" for="voteRadio2">Answer</label>
-			</p>
-			<p id="voteDiv3">
-				<input type="checkbox" name="vote" id="voteRadio3" />
-				<label id="voteLabel3" for="voteRadio3">Answer</label>
-			</p>
-			<p id="voteDiv4">
-				<input type="checkbox" name="vote" id="voteRadio4" />
-				<label id="voteLabel4" for="voteRadio4">Answer</label>
-			</p>
+			<div id="voteCheckboxes">
+				<!-- <p id="voteDiv0">
+					<input type="checkbox" name="vote" id="voteRadio0" />
+					<label id="voteLabel0" for="voteRadio0">Answer</label>
+				</p>
+				<p id="voteDiv1">
+					<input type="checkbox" name="vote" id="voteRadio1" />
+					<label id="voteLabel1" for="voteRadio1">Answer</label>
+				</p> -->
+			</div>
 			<p id="voteHint" style="display: none"></p>
 			<p>
 				<br />
@@ -152,7 +138,7 @@
 				<span id="resultsVotes4">0 votes</span><br />
 				<div class="resultsBar" id="resultsBar4" style="width: 0%">&nbsp;</div>
 			</div>
-			<div>Total Votes: <span id="resultsTotalVotes">0</span></div>
+			<div><span id="resultsTotalVotes">0</span> people voted</div>
 			<p>
 				<a href="" onclick="refresh('votePage'); return false;">Your Vote</a>
 			</p>
@@ -165,37 +151,32 @@
 			//
 			// configure is only executed when there are no votes yet,
 			// subsequent votes from the same addr overwrite previous votes.
-			const MAX_ANSWERS = 5;
+			let MAX_ANSWERS;
 			var globalStatus = {
+				people: [],
 				question: "",
 				answers: [
-					{ answer: "", votes: [] },
-					{ answer: "", votes: [] },
-					{ answer: "", votes: [] },
 					{ answer: "", votes: [] },
 					{ answer: "", votes: [] },
 				],
 			};
 
 			function configure() {
+				console.log(MAX_ANSWERS);
 				// validate input
 				if (document.getElementById("configureQuestion").value.trim() === "") {
 					document.getElementById("configureHint").innerText =
 						"⚠️ Please enter a question.";
 					return;
 				}
-				var answersCnt = 0;
+				var answerObjects = document.getElementsByClassName("answer");
+				console.log(answerObjects);
 				for (let i = 0; i < MAX_ANSWERS; i++) {
-					if (
-						document.getElementById("configureAnswer" + i).value.trim() !== ""
-					) {
-						answersCnt++;
+					if (answerObjects[i].value.trim() === "") {
+						document.getElementById("configureHint").innerText =
+							"⚠️ Please enter all the answers.";
+						return;
 					}
-				}
-				if (answersCnt < 2) {
-					document.getElementById("configureHint").innerText =
-						"⚠️ Please enter at least two answers.";
-					return;
 				}
 
 				// change status
@@ -205,12 +186,8 @@
 				var j = 0;
 				var answers = [];
 				for (let i = 0; i < MAX_ANSWERS; i++) {
-					if (
-						document.getElementById("configureAnswer" + i).value.trim() !== ""
-					) {
-						answers[j] = document
-							.getElementById("configureAnswer" + i)
-							.value.trim();
+					if (answerObjects[i].value.trim() !== "") {
+						answers[j] = answerObjects[i].value.trim();
 						globalStatus.answers[j].answer = answers[j];
 						j++;
 					}
@@ -235,8 +212,30 @@
 				return globalStatus.question.trim() !== "";
 			}
 
+			function addAnswer() {
+				//push new answer to globalstatus
+				globalStatus.answers.push({ answer: "", votes: [] });
+				//create new dom answer
+				var newAnswer = document.createElement("p");
+				newAnswer.textContent = "Answer #" + globalStatus.answers.length + ":";
+				newAnswer.appendChild(document.createElement("br"));
+				var input = document.createElement("input");
+				input.setAttribute("type", "text");
+				// input.setAttribute(
+				// 	"id",
+				// 	"configureAnswer" + (globalStatus.answers.length - 1) + "'"
+				// );
+				input.classList.add("answer");
+				newAnswer.appendChild(input);
+				//add new answer to the document
+				var answers = document.querySelector("#answers");
+				answers.appendChild(newAnswer);
+				MAX_ANSWERS = globalStatus.answers.length;
+			}
+
 			function vote() {
 				// validate input
+				var person = window.webxdc.selfAddr;
 				var vote = [];
 				for (let i = 0; i < MAX_ANSWERS; i++) {
 					if (document.getElementById("voteRadio" + i).checked) {
@@ -266,13 +265,13 @@
 						},
 						summary:
 							"" +
-							getTotalVotes() +
-							' votes in "' +
+							globalStatus.people.length +
+							' people voted in "' +
 							globalStatus.question +
 							'"',
 					},
 					// 'One vote for "' + globalStatus.answers[vote].answer + '".'
-                    window.webxdc.selfAddr + " has voted!"
+					window.webxdc.selfAddr + " has voted!"
 				);
 			}
 
@@ -294,6 +293,7 @@
 						if (globalStatus.answers[i].votes[j] === addr) {
 							globalStatus.answers[i].votes.splice(j, 1);
 							j--;
+							// if(globalStatus.people.indexOf(addr) != -1) globalStatus.people.splice(globalStatus.people.indexOf(addr),1);
 						}
 					}
 				}
@@ -315,12 +315,28 @@
 					document.getElementById("voteQuestion").innerText =
 						globalStatus.question;
 					document.getElementById("voteHint").style.display = "none";
-					for (let i = 0; i < MAX_ANSWERS; i++) {
-						document.getElementById("voteDiv" + i).style.display =
-							globalStatus.answers[i].answer === "" ? "none" : "block";
-						document.getElementById("voteLabel" + i).innerText =
-							globalStatus.answers[i].answer;
-					}
+					// for (let i = 0; i < MAX_ANSWERS; i++) {
+					// 	document.getElementById("voteDiv" + i).style.display =
+					// 		globalStatus.answers[i].answer === "" ? "none" : "block";
+					// 	document.getElementById("voteLabel" + i).innerText =
+					// 		globalStatus.answers[i].answer;
+					// }
+
+					//create answer checkboxes
+				var checkBoxes = document.getElementById("voteCheckboxes");
+				for (let i = 0; i < MAX_ANSWERS; i++) {
+					var p = document.createElement("p");
+					var input = document.createElement("input");
+					input.setAttribute("type", "checkbox");
+					input.setAttribute("id", "voteRadio"+i);
+					p.appendChild(input);
+					var label = document.createElement("label");
+					label.textContent = globalStatus.answers[i].answer;
+					p.appendChild(label);
+					checkBoxes.appendChild(p);
+					console.log(p);
+				}
+
 				} else {
 					document.getElementById("configurePage").style.display = "none";
 					document.getElementById("votePage").style.display = "none";
@@ -340,7 +356,8 @@
 							votes + (votes === 1 ? " vote (" : " votes (") + percent + "%)";
 						document.getElementById("resultsBar" + i).style.width = barWidth;
 					}
-					document.getElementById("resultsTotalVotes").innerText = totalVotes;
+					document.getElementById("resultsTotalVotes").innerText =
+						globalStatus.people.length;
 				}
 				document.getElementById(page).style.display = "block";
 			}
@@ -350,15 +367,17 @@
 				if (update.payload.action === "configure") {
 					if (!isConfigured()) {
 						globalStatus.question = update.payload.question;
+						MAX_ANSWERS = update.payload.answers.length;
 						for (let i = 0; i < MAX_ANSWERS; i++) {
 							globalStatus.answers[i].answer =
-								i < update.payload.answers.length
-									? update.payload.answers[i]
-									: "";
+								update.payload.answers[i];
 						}
 					}
 				} else if (update.payload.action === "vote") {
 					removeVote(update.payload.sender);
+					if (globalStatus.people.indexOf(update.payload.sender) == -1)
+						globalStatus.people.push(update.payload.sender);
+
 					if (
 						update.payload.vote.length >= 1 &&
 						update.payload.vote.length <= MAX_ANSWERS
