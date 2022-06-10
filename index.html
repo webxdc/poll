@@ -44,9 +44,14 @@
 				padding: 1em;
 				border-radius: 1em;
 				margin-right: 1em;
+				margin-bottom: 20px;
+				display: inline-block;
 			}
+
+			
 			.resultsBar {
 				background-color: #3792fc;
+				height: 20px;
 			}
 		</style>
 	</head>
@@ -70,33 +75,22 @@
 				</p>
 			</div>
 			<p>
-				<span id="configureHint">Leave unneeded answers fields empty.</span
+				<span id="configureHint">Please fill all the answers</span
 				><br />
 				&nbsp;
 			</p>
-			<p>
+			
 				<a class="button" href="" onclick="addAnswer(); return false;"
 					>Add an answer</a
 				>
-			</p>
-
-			<p>
 				<a class="button" href="" onclick="configure(); return false;"
 					>Create Poll</a
 				>
-			</p>
+			
 		</div>
 		<div id="votePage" class="page" style="display: none">
 			<h2 id="voteQuestion">Question</h2>
 			<div id="voteCheckboxes">
-				<!-- <p id="voteDiv0">
-					<input type="checkbox" name="vote" id="voteRadio0" />
-					<label id="voteLabel0" for="voteRadio0">Answer</label>
-				</p>
-				<p id="voteDiv1">
-					<input type="checkbox" name="vote" id="voteRadio1" />
-					<label id="voteLabel1" for="voteRadio1">Answer</label>
-				</p> -->
 			</div>
 			<p id="voteHint" style="display: none"></p>
 			<p>
@@ -109,35 +103,8 @@
 		</div>
 		<div id="resultsPage" class="page" style="display: none">
 			<h2 id="resultsQuestion">Question</h2>
-			<div id="resultsDiv0">
-				<b id="resultsAnswer0">Answer</b> -
-				<span id="resultsVotes0">0 votes</span><br />
-				<div class="resultsBar" id="resultsBar0" style="width: 0%">&nbsp;</div>
-				<br />
-			</div>
-			<div id="resultsDiv1">
-				<b id="resultsAnswer1">Answer</b> -
-				<span id="resultsVotes1">0 votes</span><br />
-				<div class="resultsBar" id="resultsBar1" style="width: 0%">&nbsp;</div>
-				<br />
-			</div>
-			<div id="resultsDiv2">
-				<b id="resultsAnswer2">Answer</b> -
-				<span id="resultsVotes2">0 votes</span><br />
-				<div class="resultsBar" id="resultsBar2" style="width: 0%">&nbsp;</div>
-				<br />
-			</div>
-			<div id="resultsDiv3">
-				<b id="resultsAnswer3">Answer</b> -
-				<span id="resultsVotes3">0 votes</span><br />
-				<div class="resultsBar" id="resultsBar3" style="width: 0%">&nbsp;</div>
-				<br />
-			</div>
-			<div id="resultsDiv4">
-				<b id="resultsAnswer4">Answer</b> -
-				<span id="resultsVotes4">0 votes</span><br />
-				<div class="resultsBar" id="resultsBar4" style="width: 0%">&nbsp;</div>
-			</div>
+			<div id="resultsDiv"></div>
+			
 			<div><span id="resultsTotalVotes">0</span> people voted</div>
 			<p>
 				<a href="" onclick="refresh('votePage'); return false;">Your Vote</a>
@@ -151,18 +118,14 @@
 			//
 			// configure is only executed when there are no votes yet,
 			// subsequent votes from the same addr overwrite previous votes.
-			let MAX_ANSWERS;
+			var MAX_ANSWERS = 2;
 			var globalStatus = {
 				people: [],
 				question: "",
-				answers: [
-					{ answer: "", votes: [] },
-					{ answer: "", votes: [] },
-				],
+				answers: [],
 			};
 
 			function configure() {
-				console.log(MAX_ANSWERS);
 				// validate input
 				if (document.getElementById("configureQuestion").value.trim() === "") {
 					document.getElementById("configureHint").innerText =
@@ -170,7 +133,7 @@
 					return;
 				}
 				var answerObjects = document.getElementsByClassName("answer");
-				console.log(answerObjects);
+				MAX_ANSWERS = answerObjects.length;
 				for (let i = 0; i < MAX_ANSWERS; i++) {
 					if (answerObjects[i].value.trim() === "") {
 						document.getElementById("configureHint").innerText =
@@ -183,13 +146,10 @@
 				globalStatus.question = document
 					.getElementById("configureQuestion")
 					.value.trim();
-				var j = 0;
 				var answers = [];
 				for (let i = 0; i < MAX_ANSWERS; i++) {
 					if (answerObjects[i].value.trim() !== "") {
-						answers[j] = answerObjects[i].value.trim();
-						globalStatus.answers[j].answer = answers[j];
-						j++;
+						answers.push(answerObjects[i].value.trim());
 					}
 				}
 
@@ -202,9 +162,10 @@
 							question: globalStatus.question,
 							answers: answers,
 						},
+						info: 'Poll "' + globalStatus.question + '" created!',
 						summary: globalStatus.question,
 					},
-					'Poll "' + globalStatus.question + '" created.'
+					'Poll "' + globalStatus.question + '" created!'
 				);
 			}
 
@@ -213,24 +174,18 @@
 			}
 
 			function addAnswer() {
-				//push new answer to globalstatus
-				globalStatus.answers.push({ answer: "", votes: [] });
+				MAX_ANSWERS++;
 				//create new dom answer
 				var newAnswer = document.createElement("p");
-				newAnswer.textContent = "Answer #" + globalStatus.answers.length + ":";
+				newAnswer.textContent = "Answer #" + MAX_ANSWERS + ":";
 				newAnswer.appendChild(document.createElement("br"));
 				var input = document.createElement("input");
 				input.setAttribute("type", "text");
-				// input.setAttribute(
-				// 	"id",
-				// 	"configureAnswer" + (globalStatus.answers.length - 1) + "'"
-				// );
 				input.classList.add("answer");
 				newAnswer.appendChild(input);
 				//add new answer to the document
 				var answers = document.querySelector("#answers");
 				answers.appendChild(newAnswer);
-				MAX_ANSWERS = globalStatus.answers.length;
 			}
 
 			function vote() {
@@ -263,6 +218,7 @@
 							sender: window.webxdc.selfAddr,
 							vote: vote,
 						},
+						info: window.webxdc.selfName + " voted in '" + globalStatus.question + "'",
 						summary:
 							"" +
 							globalStatus.people.length +
@@ -270,8 +226,7 @@
 							globalStatus.question +
 							'"',
 					},
-					// 'One vote for "' + globalStatus.answers[vote].answer + '".'
-					window.webxdc.selfAddr + " has voted!"
+					window.webxdc.selfName + " has voted!"
 				);
 			}
 
@@ -293,7 +248,6 @@
 						if (globalStatus.answers[i].votes[j] === addr) {
 							globalStatus.answers[i].votes.splice(j, 1);
 							j--;
-							// if(globalStatus.people.indexOf(addr) != -1) globalStatus.people.splice(globalStatus.people.indexOf(addr),1);
 						}
 					}
 				}
@@ -323,38 +277,63 @@
 					// }
 
 					//create answer checkboxes
-				var checkBoxes = document.getElementById("voteCheckboxes");
-				for (let i = 0; i < MAX_ANSWERS; i++) {
-					var p = document.createElement("p");
-					var input = document.createElement("input");
-					input.setAttribute("type", "checkbox");
-					input.setAttribute("id", "voteRadio"+i);
-					p.appendChild(input);
-					var label = document.createElement("label");
-					label.textContent = globalStatus.answers[i].answer;
-					p.appendChild(label);
-					checkBoxes.appendChild(p);
-					console.log(p);
-				}
-
+					var checkBoxes = document.getElementById("voteCheckboxes");
+					checkBoxes.innerHTML = "";
+					for (let i = 0; i < MAX_ANSWERS; i++) {
+						var p = document.createElement("p");
+						var input = document.createElement("input");
+						input.setAttribute("type", "checkbox");
+						input.setAttribute("id", "voteRadio" + i);
+						p.appendChild(input);
+						var label = document.createElement("label");
+						label.textContent = globalStatus.answers[i].answer;
+						p.appendChild(label);
+						checkBoxes.appendChild(p);
+						console.log(p);
+					}
 				} else {
 					document.getElementById("configurePage").style.display = "none";
 					document.getElementById("votePage").style.display = "none";
 					document.getElementById("resultsQuestion").innerText =
 						globalStatus.question;
 					let totalVotes = getTotalVotes();
+					var resultsContainer = document.getElementById("resultsDiv");
+					resultsContainer.innerHTML = "";
 					for (let i = 0; i < MAX_ANSWERS; i++) {
+						// let votes = globalStatus.answers[i].votes.length;
+						// let percent =
+						// 	totalVotes === 0 ? 0 : Math.round((votes * 100) / totalVotes);
+						// let barWidth = percent === 0 ? "1px" : percent + "%";
+						// document.getElementById("resultsDiv" + i).style.display =
+						// 	globalStatus.answers[i].answer === "" ? "none" : "block";
+						// document.getElementById("resultsAnswer" + i).innerText =
+						// 	globalStatus.answers[i].answer;
+						// document.getElementById("resultsVotes" + i).innerText =
+						// 	votes + (votes === 1 ? " vote (" : " votes (") + percent + "%)";
+						// document.getElementById("resultsBar" + i).style.width = barWidth;
+
+						//create answer divs
+						var resultsDiv = document.createElement("div");
+						var resultsAnswer = document.createElement("b");
+						resultsAnswer.textContent = globalStatus.answers[i].answer;
+						resultsDiv.appendChild(resultsAnswer);
+
 						let votes = globalStatus.answers[i].votes.length;
 						let percent =
 							totalVotes === 0 ? 0 : Math.round((votes * 100) / totalVotes);
 						let barWidth = percent === 0 ? "1px" : percent + "%";
-						document.getElementById("resultsDiv" + i).style.display =
-							globalStatus.answers[i].answer === "" ? "none" : "block";
-						document.getElementById("resultsAnswer" + i).innerText =
-							globalStatus.answers[i].answer;
-						document.getElementById("resultsVotes" + i).innerText =
-							votes + (votes === 1 ? " vote (" : " votes (") + percent + "%)";
-						document.getElementById("resultsBar" + i).style.width = barWidth;
+
+						var span = document.createElement("span");
+						span.textContent =
+							" - " + votes  + (votes === 1 ? " vote (" : " votes (") + percent + "%)";;
+						resultsDiv.appendChild(span);
+						resultsDiv.appendChild(document.createElement("br"));
+						var resultsBar = document.createElement("div");
+						resultsBar.classList.add("resultsBar");
+						
+						resultsBar.style.width = barWidth;
+						resultsDiv.appendChild(resultsBar);
+						resultsContainer.appendChild(resultsDiv);
 					}
 					document.getElementById("resultsTotalVotes").innerText =
 						globalStatus.people.length;
@@ -368,11 +347,10 @@
 					if (!isConfigured()) {
 						globalStatus.question = update.payload.question;
 						MAX_ANSWERS = update.payload.answers.length;
-						for (let i = 0; i < MAX_ANSWERS; i++) {
-							globalStatus.answers[i].answer =
-								update.payload.answers[i];
-						}
 					}
+					for (let i = 0; i < MAX_ANSWERS; i++) {
+							globalStatus.answers.push({ answer: update.payload.answers[i], votes: [] });
+						}
 				} else if (update.payload.action === "vote") {
 					removeVote(update.payload.sender);
 					if (globalStatus.people.indexOf(update.payload.sender) == -1)
