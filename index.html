@@ -48,7 +48,6 @@
 				display: inline-block;
 			}
 
-			
 			.resultsBar {
 				background-color: #3792fc;
 				height: 20px;
@@ -75,23 +74,23 @@
 				</p>
 			</div>
 			<p>
-				<span id="configureHint">Please fill all the answers</span
-				><br />
+				<span id="configureHint">Please fill all the answers</span><br />
 				&nbsp;
 			</p>
-			
-				<a class="button" href="" onclick="addAnswer(); return false;"
-					>Add an answer</a
-				>
-				<a class="button" href="" onclick="configure(); return false;"
-					>Create Poll</a
-				>
-			
+
+			<a class="button" href="" onclick="addAnswer(); return false;"
+				>Add an answer</a
+			>
+			<a class="button" href="" onclick="removeAnswer(); return false;"
+				>Remove an answer</a
+			>
+			<a class="button" href="" onclick="configure(); return false;"
+				>Create Poll</a
+			>
 		</div>
 		<div id="votePage" class="page" style="display: none">
 			<h2 id="voteQuestion">Question</h2>
-			<div id="voteCheckboxes">
-			</div>
+			<div id="voteCheckboxes"></div>
 			<p id="voteHint" style="display: none"></p>
 			<p>
 				<br />
@@ -104,7 +103,7 @@
 		<div id="resultsPage" class="page" style="display: none">
 			<h2 id="resultsQuestion">Question</h2>
 			<div id="resultsDiv"></div>
-			
+
 			<div><span id="resultsTotalVotes">0</span> people voted</div>
 			<p>
 				<a href="" onclick="refresh('votePage'); return false;">Your Vote</a>
@@ -183,9 +182,24 @@
 				input.setAttribute("type", "text");
 				input.classList.add("answer");
 				newAnswer.appendChild(input);
+				// var removeBtn = document.createElement("button");
+				// removeBtn.textContent = "Remove answer";
+				// removeBtn.addEventListener("click",removeAnswer);
+				// newAnswer.appendChild(removeBtn);
 				//add new answer to the document
 				var answers = document.querySelector("#answers");
 				answers.appendChild(newAnswer);
+			}
+
+			function removeAnswer() {
+				if (MAX_ANSWERS > 2) {
+					MAX_ANSWERS--;
+					var answer = document.getElementsByClassName("answer");
+					answer[answer.length - 1].parentNode.remove();
+				} else {
+					document.getElementById("configureHint").innerText =
+							"⚠️ You need at least 2 answers";
+				}
 			}
 
 			function vote() {
@@ -218,7 +232,11 @@
 							sender: window.webxdc.selfAddr,
 							vote: vote,
 						},
-						info: window.webxdc.selfName + " voted in '" + globalStatus.question + "'",
+						info:
+							window.webxdc.selfName +
+							" voted in '" +
+							globalStatus.question +
+							"'",
 						summary:
 							"" +
 							globalStatus.people.length +
@@ -284,6 +302,7 @@
 						var input = document.createElement("input");
 						input.setAttribute("type", "checkbox");
 						input.setAttribute("id", "voteRadio" + i);
+						if(globalStatus.answers[i].votes.includes(window.webxdc.selfAddr)) input.checked = true;
 						p.appendChild(input);
 						var label = document.createElement("label");
 						label.textContent = globalStatus.answers[i].answer;
@@ -325,12 +344,16 @@
 
 						var span = document.createElement("span");
 						span.textContent =
-							" - " + votes  + (votes === 1 ? " vote (" : " votes (") + percent + "%)";;
+							" - " +
+							votes +
+							(votes === 1 ? " vote (" : " votes (") +
+							percent +
+							"%)";
 						resultsDiv.appendChild(span);
 						resultsDiv.appendChild(document.createElement("br"));
 						var resultsBar = document.createElement("div");
 						resultsBar.classList.add("resultsBar");
-						
+
 						resultsBar.style.width = barWidth;
 						resultsDiv.appendChild(resultsBar);
 						resultsContainer.appendChild(resultsDiv);
@@ -349,8 +372,11 @@
 						MAX_ANSWERS = update.payload.answers.length;
 					}
 					for (let i = 0; i < MAX_ANSWERS; i++) {
-							globalStatus.answers.push({ answer: update.payload.answers[i], votes: [] });
-						}
+						globalStatus.answers.push({
+							answer: update.payload.answers[i],
+							votes: [],
+						});
+					}
 				} else if (update.payload.action === "vote") {
 					removeVote(update.payload.sender);
 					if (globalStatus.people.indexOf(update.payload.sender) == -1)
