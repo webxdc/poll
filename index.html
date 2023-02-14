@@ -263,12 +263,7 @@
 
 			function removeVote(addr) {
 				for (let i = 0; i < MAX_ANSWERS; i++) {
-					for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
-						if (globalStatus.answers[i].votes[j] === addr) {
-							globalStatus.answers[i].votes.splice(j, 1);
-							j--;
-						}
-					}
+					globalStatus.answers[i].votes = globalStatus.answers[i].votes.filter((vote) => vote !== addr);
 				}
 			}
 
@@ -365,6 +360,15 @@
 				document.getElementById(page).style.display = "block";
 			}
 
+			function updateScreen() {
+				if (!isConfigured()) {
+					refresh("configurePage");
+				} else if (!hasSelfVoted()) {
+					refresh("votePage");
+				} else {
+					refresh("resultsPage");
+				}
+			}
 			// main
 			window.webxdc.setUpdateListener((update) => {
 				if (update.payload.action === "configure") {
@@ -396,15 +400,9 @@
 				}
 
 				if (update.serial === update.max_serial) {
-					if (!isConfigured()) {
-						refresh("configurePage");
-					} else if (!hasSelfVoted()) {
-						refresh("votePage");
-					} else {
-						refresh("resultsPage");
-					}
+					updateScreen()
 				}
-			});
+			}).then(updateScreen);
 		</script>
 	</body>
 </html>
