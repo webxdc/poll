@@ -35,18 +35,25 @@
 			input[type="text"] {
 				width: 90%;
 			}
-			a {
-				color: #3792fc;
-				text-decoration: none;
-			}
-			a.button {
+			.button {
 				color: #fff;
 				background: #3792fc;
+				cursor: pointer;
+				border: none;
+				font-size: 1rem;
 				padding: 1em;
 				border-radius: 1em;
 				margin-right: 1em;
 				margin-bottom: 20px;
 				display: inline-block;
+			}
+			.button-link-like {
+				color: #3792fc;
+				border: none;
+				background: none;
+				cursor: pointer;
+				font-size: 1rem;
+				padding: 0;
 			}
 
 			.resultsBar {
@@ -79,14 +86,14 @@
 				&nbsp;
 			</p>
 
-			<a class="button" href="" onclick="addAnswer(); return false;"
-				>Add an answer</a
+			<button type="button" class="button" onclick="addAnswer()"
+				>Add an answer</button
 			>
-			<a class="button" href="" onclick="removeAnswer(); return false;"
-				>Remove an answer</a
+			<button type="button" class="button" onclick="removeAnswer()"
+				>Remove an answer</button
 			>
-			<a class="button" href="" onclick="configure(); return false;"
-				>Create Poll</a
+			<button type="button" class="button" onclick="configure()"
+				>Create Poll</button
 			>
 		</div>
 		<div id="votePage" class="page" style="display: none">
@@ -95,9 +102,9 @@
 			<p id="voteHint" style="display: none"></p>
 			<p>
 				<br />
-				<a class="button" href="" onclick="vote(); return false;">Vote</a>
-				<a href="" onclick="refresh('resultsPage'); return false;"
-					>View Results</a
+				<button type="button" class="button" onclick="vote()">Vote</button>
+				<button type="button" class="button-link-like" onclick="refresh('resultsPage')"
+					>View Results</button
 				>
 			</p>
 		</div>
@@ -107,7 +114,7 @@
 
 			<div><span id="resultsTotalVotes">0</span> people voted</div>
 			<p>
-				<a href="" onclick="refresh('votePage'); return false;">Your Vote</a>
+				<button type="button" onclick="refresh('votePage')">Your Vote</button>
 			</p>
 		</div>
 		<script>
