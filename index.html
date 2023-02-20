@@ -21,7 +21,7 @@
 			}
 			body {
 				font-family: sans-serif;
-				padding: 2em;
+				padding: 0.5em;
 			}
 			.page {
 				border: 4px solid #3792fc;
@@ -35,18 +35,25 @@
 			input[type="text"] {
 				width: 90%;
 			}
-			a {
-				color: #3792fc;
-				text-decoration: none;
-			}
-			a.button {
+			.button {
 				color: #fff;
 				background: #3792fc;
+				cursor: pointer;
+				border: none;
+				font-size: 1rem;
 				padding: 1em;
 				border-radius: 1em;
 				margin-right: 1em;
 				margin-bottom: 20px;
 				display: inline-block;
+			}
+			.button-link-like {
+				color: #3792fc;
+				border: none;
+				background: none;
+				cursor: pointer;
+				font-size: 1rem;
+				padding: 0;
 			}
 
 			.resultsBar {
@@ -79,14 +86,14 @@
 				&nbsp;
 			</p>
 
-			<a class="button" href="" onclick="addAnswer(); return false;"
-				>Add an answer</a
+			<button type="button" class="button" onclick="addAnswer()"
+				>Add an answer</button
 			>
-			<a class="button" href="" onclick="removeAnswer(); return false;"
-				>Remove an answer</a
+			<button type="button" class="button" onclick="removeAnswer()"
+				>Remove an answer</button
 			>
-			<a class="button" href="" onclick="configure(); return false;"
-				>Create Poll</a
+			<button type="button" class="button" onclick="configure()"
+				>Create Poll</button
 			>
 		</div>
 		<div id="votePage" class="page" style="display: none">
@@ -95,9 +102,9 @@
 			<p id="voteHint" style="display: none"></p>
 			<p>
 				<br />
-				<a class="button" href="" onclick="vote(); return false;">Vote</a>
-				<a href="" onclick="refresh('resultsPage'); return false;"
-					>View Results</a
+				<button type="button" class="button" onclick="vote()">Vote</button>
+				<button type="button" class="button-link-like" onclick="refresh('resultsPage')"
+					>View Results</button
 				>
 			</p>
 		</div>
@@ -107,7 +114,7 @@
 
 			<div><span id="resultsTotalVotes">0</span> people voted</div>
 			<p>
-				<a href="" onclick="refresh('votePage'); return false;">Your Vote</a>
+				<button type="button" onclick="refresh('votePage')">Your Vote</button>
 			</p>
 		</div>
 		<script>
@@ -118,7 +125,7 @@
 			//
 			// configure is only executed when there are no votes yet,
 			// subsequent votes from the same addr overwrite previous votes.
-			var MAX_ANSWERS = 2;
+			var maxAnswers = 2;
 			var globalStatus = {
 				people: [],
 				question: "",
@@ -133,8 +140,8 @@
 					return;
 				}
 				var answerObjects = document.getElementsByClassName("answer");
-				MAX_ANSWERS = answerObjects.length;
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				maxAnswers = answerObjects.length;
+				for (let i = 0; i < maxAnswers; i++) {
 					if (answerObjects[i].value.trim() === "") {
 						document.getElementById("configureHint").innerText =
 							"⚠️ Please enter all the answers.";
@@ -147,7 +154,7 @@
 					.getElementById("configureQuestion")
 					.value.trim();
 				var answers = [];
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				for (let i = 0; i < maxAnswers; i++) {
 					if (answerObjects[i].value.trim() !== "") {
 						answers.push(answerObjects[i].value.trim());
 					}
@@ -174,10 +181,10 @@
 			}
 
 			function addAnswer() {
-				MAX_ANSWERS++;
+				maxAnswers++;
 				//create new dom answer
 				var newAnswer = document.createElement("p");
-				newAnswer.textContent = "Answer #" + MAX_ANSWERS + ":";
+				newAnswer.textContent = "Answer #" + maxAnswers + ":";
 				newAnswer.appendChild(document.createElement("br"));
 				var input = document.createElement("input");
 				input.setAttribute("type", "text");
@@ -193,8 +200,8 @@
 			}
 
 			function removeAnswer() {
-				if (MAX_ANSWERS > 2) {
-					MAX_ANSWERS--;
+				if (maxAnswers > 2) {
+					maxAnswers--;
 					var answer = document.getElementsByClassName("answer");
 					answer[answer.length - 1].parentNode.remove();
 				} else {
@@ -207,7 +214,7 @@
 				// validate input
 				var person = window.webxdc.selfAddr;
 				var vote = [];
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				for (let i = 0; i < maxAnswers; i++) {
 					if (document.getElementById("voteRadio" + i).checked) {
 						vote.push(i);
 					}
@@ -251,7 +258,7 @@
 
 			function hasSelfVoted() {
 				var selfAddr = window.webxdc.selfAddr;
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				for (let i = 0; i < maxAnswers; i++) {
 					for (let j = 0; j < globalStatus.answers[i].votes.length; j++) {
 						if (globalStatus.answers[i].votes[j] === selfAddr) {
 							return true;
@@ -262,14 +269,14 @@
 			}
 
 			function removeVote(addr) {
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				for (let i = 0; i < maxAnswers; i++) {
 					globalStatus.answers[i].votes = globalStatus.answers[i].votes.filter((vote) => vote !== addr);
 				}
 			}
 
 			function getTotalVotes() {
 				var totalVotes = 0;
-				for (let i = 0; i < MAX_ANSWERS; i++) {
+				for (let i = 0; i < maxAnswers; i++) {
 					totalVotes += globalStatus.answers[i].votes.length;
 				}
 				return totalVotes;
@@ -283,7 +290,7 @@
 					document.getElementById("voteQuestion").innerText =
 						globalStatus.question;
 					document.getElementById("voteHint").style.display = "none";
-					// for (let i = 0; i < MAX_ANSWERS; i++) {
+					// for (let i = 0; i < maxAnswers; i++) {
 					// 	document.getElementById("voteDiv" + i).style.display =
 					// 		globalStatus.answers[i].answer === "" ? "none" : "block";
 					// 	document.getElementById("voteLabel" + i).innerText =
@@ -293,7 +300,7 @@
 					//create answer checkboxes
 					var checkBoxes = document.getElementById("voteCheckboxes");
 					checkBoxes.innerHTML = "";
-					for (let i = 0; i < MAX_ANSWERS; i++) {
+					for (let i = 0; i < maxAnswers; i++) {
 						var p = document.createElement("p");
 						var input = document.createElement("input");
 						input.setAttribute("type", "checkbox");
@@ -314,7 +321,7 @@
 					let totalVotes = getTotalVotes();
 					var resultsContainer = document.getElementById("resultsDiv");
 					resultsContainer.innerHTML = "";
-					for (let i = 0; i < MAX_ANSWERS; i++) {
+					for (let i = 0; i < maxAnswers; i++) {
 						// let votes = globalStatus.answers[i].votes.length;
 						// let percent =
 						// 	totalVotes === 0 ? 0 : Math.round((votes * 100) / totalVotes);
@@ -374,9 +381,9 @@
 				if (update.payload.action === "configure") {
 					if (!isConfigured()) {
 						globalStatus.question = update.payload.question;
-						MAX_ANSWERS = update.payload.answers.length;
+						maxAnswers = update.payload.answers.length;
 					}
-					for (let i = 0; i < MAX_ANSWERS; i++) {
+					for (let i = 0; i < maxAnswers; i++) {
 						globalStatus.answers.push({
 							answer: update.payload.answers[i],
 							votes: [],
@@ -389,7 +396,7 @@
 
 					if (
 						update.payload.vote.length >= 1 &&
-						update.payload.vote.length <= MAX_ANSWERS
+						update.payload.vote.length <= maxAnswers
 					) {
 						for (let i = 0; i < update.payload.vote.length; i++) {
 							globalStatus.answers[update.payload.vote[i]].votes.push(
