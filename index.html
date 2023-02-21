@@ -65,36 +65,38 @@
 
 	<body>
 		<div id="configurePage" class="page" style="display: block">
-			<h2>Configure Your Poll</h2>
-			<div id="answers">
+			<form id="configurePageForm">
+				<h2>Configure Your Poll</h2>
+				<div id="answers">
+					<p>
+						<b>Question:</b><br />
+						<input type="text" id="configureQuestion" required pattern=".*\S.*" /><br />
+						&nbsp;
+					</p>
+					<p>
+						Answer #1:<br />
+						<input type="text" id="configureAnswer0" class="answer" required pattern=".*\S.*" />
+					</p>
+					<p>
+						Answer #2:<br />
+						<input type="text" id="configureAnswer1" class="answer" required pattern=".*\S.*" />
+					</p>
+				</div>
 				<p>
-					<b>Question:</b><br />
-					<input type="text" id="configureQuestion" /><br />
+					<span id="configureHint">Please fill all the answers</span><br />
 					&nbsp;
 				</p>
-				<p>
-					Answer #1:<br />
-					<input type="text" id="configureAnswer0" class="answer" />
-				</p>
-				<p>
-					Answer #2:<br />
-					<input type="text" id="configureAnswer1" class="answer" />
-				</p>
-			</div>
-			<p>
-				<span id="configureHint">Please fill all the answers</span><br />
-				&nbsp;
-			</p>
 
-			<button type="button" class="button" onclick="addAnswer()"
-				>Add an answer</button
-			>
-			<button type="button" class="button" onclick="removeAnswer()"
-				>Remove an answer</button
-			>
-			<button type="button" class="button" onclick="configure()"
-				>Create Poll</button
-			>
+				<button type="button" class="button" onclick="addAnswer()"
+					>Add an answer</button
+				>
+				<button type="button" class="button" onclick="removeAnswer()"
+					>Remove an answer</button
+				>
+				<button type="submit" class="button"
+					>Create Poll</button
+				>
+			</form>
 		</div>
 		<div id="votePage" class="page" style="display: none">
 			<h2 id="voteQuestion">Question</h2>
@@ -132,23 +134,11 @@
 				answers: [],
 			};
 
-			function configure() {
-				// validate input
-				if (document.getElementById("configureQuestion").value.trim() === "") {
-					document.getElementById("configureHint").innerText =
-						"⚠️ Please enter a question.";
-					return;
-				}
+			document.getElementById("configurePageForm").addEventListener("submit", e => {
+				e.preventDefault();
+
 				var answerObjects = document.getElementsByClassName("answer");
 				maxAnswers = answerObjects.length;
-				for (let i = 0; i < maxAnswers; i++) {
-					if (answerObjects[i].value.trim() === "") {
-						document.getElementById("configureHint").innerText =
-							"⚠️ Please enter all the answers.";
-						return;
-					}
-				}
-
 				// change status
 				globalStatus.question = document
 					.getElementById("configureQuestion")
@@ -174,7 +164,7 @@
 					},
 					'Poll "' + globalStatus.question + '" created!'
 				);
-			}
+			});
 
 			function isConfigured() {
 				return globalStatus.question.trim() !== "";
@@ -188,6 +178,10 @@
 				newAnswer.appendChild(document.createElement("br"));
 				var input = document.createElement("input");
 				input.setAttribute("type", "text");
+				input.setAttribute("required", "");
+				// At least one non-space character, so that when we trim it it's not
+				// an empty string.
+				input.setAttribute("pattern", ".*\\S.*");
 				input.classList.add("answer");
 				newAnswer.appendChild(input);
 				// var removeBtn = document.createElement("button");
