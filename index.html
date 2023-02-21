@@ -72,7 +72,7 @@
 			<form id="configurePageForm">
 				<h2>Configure Your Poll</h2>
 				<p>
-					<b>Question:</b><br />
+					<label for="configureQuestion"><b>Question:</b></label><br />
 					<input type="text" id="configureQuestion" required pattern=".*\S.*" /><br />
 					&nbsp;
 				</p>
@@ -116,6 +116,11 @@
 			</p>
 		</div>
 		<script>
+			let _nextUniquieNum = 1;
+			const uniquieNum = () => {
+				return _nextUniquieNum++;
+			}
+
 			// the status is altered by the following updates:
 			//
 			// {action:"configure", question:"", answers:["", "", "", "", ""]}
@@ -172,7 +177,11 @@
 				maxAnswers++;
 				//create new dom answer
 				var newAnswer = document.createElement("li");
-				newAnswer.textContent = "Answer #" + maxAnswers + ":";
+				const label = document.createElement("label");
+				const inputId = "answer-" + uniquieNum();
+				label.textContent = "Answer #" + maxAnswers + ":";
+				label.setAttribute("for", inputId);
+				newAnswer.appendChild(label);
 				newAnswer.appendChild(document.createElement("br"));
 				var input = document.createElement("input");
 				input.setAttribute("type", "text");
@@ -180,6 +189,7 @@
 				// At least one non-space character, so that when we trim it it's not
 				// an empty string.
 				input.setAttribute("pattern", ".*\\S.*");
+				input.setAttribute("id", inputId);
 				input.classList.add("answer");
 				newAnswer.appendChild(input);
 				// var removeBtn = document.createElement("button");
