@@ -32,6 +32,10 @@
 				max-width: 50em;
 				background: white;
 			}
+			#answers {
+				padding: 0;
+				list-style: none;
+			}
 			input[type="text"] {
 				width: 90%;
 			}
@@ -67,21 +71,13 @@
 		<div id="configurePage" class="page" style="display: block">
 			<form id="configurePageForm">
 				<h2>Configure Your Poll</h2>
-				<div id="answers">
-					<p>
-						<b>Question:</b><br />
-						<input type="text" id="configureQuestion" required pattern=".*\S.*" /><br />
-						&nbsp;
-					</p>
-					<p>
-						Answer #1:<br />
-						<input type="text" id="configureAnswer0" class="answer" required pattern=".*\S.*" />
-					</p>
-					<p>
-						Answer #2:<br />
-						<input type="text" id="configureAnswer1" class="answer" required pattern=".*\S.*" />
-					</p>
-				</div>
+				<p>
+					<b>Question:</b><br />
+					<input type="text" id="configureQuestion" required pattern=".*\S.*" /><br />
+					&nbsp;
+				</p>
+				<ul id="answers">
+				</ul>
 				<p>
 					<span id="configureHint">Please fill all the answers</span><br />
 					&nbsp;
@@ -127,12 +123,14 @@
 			//
 			// configure is only executed when there are no votes yet,
 			// subsequent votes from the same addr overwrite previous votes.
-			var maxAnswers = 2;
+			var maxAnswers = 0;
 			var globalStatus = {
 				people: [],
 				question: "",
 				answers: [],
 			};
+			addAnswer();
+			addAnswer();
 
 			document.getElementById("configurePageForm").addEventListener("submit", e => {
 				e.preventDefault();
@@ -173,7 +171,7 @@
 			function addAnswer() {
 				maxAnswers++;
 				//create new dom answer
-				var newAnswer = document.createElement("p");
+				var newAnswer = document.createElement("li");
 				newAnswer.textContent = "Answer #" + maxAnswers + ":";
 				newAnswer.appendChild(document.createElement("br"));
 				var input = document.createElement("input");
