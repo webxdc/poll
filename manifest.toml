@@ -1,2 +1,5 @@
 name = "Poll"
+author_name = "Bjoern"
+author_email = "r10s@b44t.com"
+description = "Webxdc poll app for deltachat"
 source_code_url = "https://github.com/webxdc/webxdc-poll"
