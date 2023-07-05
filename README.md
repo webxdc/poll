@@ -1,4 +1,6 @@
-# Poll
+# this repo was moved to https://codeberg.org/webxdc/poll
+
+## Poll
 
 A Webxdc with a simple poll -
 one question,
